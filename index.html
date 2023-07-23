@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Get data on me from Facebook</title>
+  <style>
+    .data-container {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+  </style>
+  <script>
+    function statusChangeCallback(response) {
+      if (response.status === 'connected') {
+        console.log('User is logged in and authenticated.');
+        getUserData();
+      } else {
+        console.log('User is not logged in or authenticated.');
+        // Perform actions for non-logged in user
+      }
+    }
+
+    function checkLoginState() {
+      FB.getLoginStatus(function(response) {
+        statusChangeCallback(response);
+      });
+    }
+
+    function displayData(data, container) {
+      if (typeof data !== 'object') {
+        // Display simple data
+        container.innerHTML += '<p>' + data + '</p>';
+      } else if (Array.isArray(data)) {
+        // Display array data
+        container.innerHTML += '<ul>';
+        data.forEach(function(item) {
+          container.innerHTML += '<li>' + item + '</li>';
+        });
+        container.innerHTML += '</ul>';
+      } else {
+        // Display object data
+        container.innerHTML += '<ul>';
+        for (var key in data) {
+          if (data.hasOwnProperty(key)) {
+            container.innerHTML += '<li><strong>' + key + '</strong>: ' + data[key] + '</li>';
+          }
+        }
+        container.innerHTML += '</ul>';
+      }
+    }
+
+    function getUserData() {
+      FB.api('/me', {fields: 'id,last_name,first_name,middle_name,name,name_format,picture,short_name'}, function(response) {
+        console.log('User data:', response);
+        var userData = document.getElementById('user-data');
+
+        for (var key in response) {
+          if (response.hasOwnProperty(key)) {
+            var container = document.createElement('div');
+            container.className = 'data-container';
+            container.innerHTML = '<h3>' + key + '</h3>';
+            displayData(response[key], container);
+            userData.appendChild(container);
+          }
+        }
+      });
+    }
+  </script>
+  <script async defer src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v17.0&appId=178725731691200&autoLogAppEvents=1" nonce="1234567890"></script>
+</head>
+<body>
+  <div id="fb-root"></div>
+  <script>
+    window.fbAsyncInit = function() {
+		FB.init({
+		appId            : '178725731691200',
+		autoLogAppEvents : true,
+		xfbml            : true,
+		version          : 'v17.0'
+		});
+	};
+
+    FB.getLoginStatus(function(response) {
+        statusChangeCallback(response);
+    });
+    
+  </script>
+
+  <h1>Get data on me from Facebook</h1>
+  <div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="true" data-onlogin="checkLoginState()"></div>
+  
+  <div id="user-data"></div>
+</body>
+</html>
